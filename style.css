@@ -1,0 +1,10 @@
+html, body {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 26px;
+    margin: 5px;
+    padding: 0;
+}
+
+canvas {
+    border: solid 1px #c0c0c0;
+}
