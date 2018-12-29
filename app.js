@@ -1,10 +1,6 @@
-// this is the main prediction function!
-var predictMNIST = function(digits) {
-    console.log(digits);
-};
-
 // Vue component for drawing and
 // converting hand-drawn digits
+// to predicted numbers
 Vue.component('drawing-board', {
     data: function () {
         return {
@@ -13,12 +9,11 @@ Vue.component('drawing-board', {
                     x: 0,
                     y: 0
                 },
-                previous: {
-                    x: 0,
-                    y: 0
-                },
                 down: false
-            }
+            },
+            model: null,
+            probabilities: [],
+            prediction: -1
         }
     },
     computed: {
@@ -33,16 +28,24 @@ Vue.component('drawing-board', {
         }
     },
     template: `
-        <div>
-            <canvas id="canvas" 
-                    v-on:mousedown="handleMouseDown" 
-                    v-on:mouseup="handleMouseUp" 
-                    v-on:mousemove="handleMouseMove" 
-                    width="200px" 
-                    height="200px">
-            </canvas>
-            <canvas id="mini" width="28" height="28"></canvas>
-            <div>
+        <div id="ml">
+            <div id="draw">
+                <canvas id="canvas" 
+                        v-on:mousedown="handleMouseDown" 
+                        v-on:mouseup="handleMouseUp" 
+                        v-on:mousemove="handleMouseMove" 
+                        width="250px" 
+                        height="250px">
+                </canvas>
+                <canvas id="mini" width="28" height="28"></canvas>
+            </div>
+            <div id="predict" v-if="prediction > -1">
+                <div id="prediction">I think it's a {{prediction}}</div>
+                <ol start="0">
+                    <li v-for="p in probabilities">{{p.toPrecision(3)}}</li>
+                </ol>
+            </div>
+            <div id="buttons">
                 <button v-on:click="reset">Reset</button>
                 <button v-on:click="predict">Predict</button>
             </div>
@@ -90,8 +93,9 @@ Vue.component('drawing-board', {
         reset: function(event) {
             this.clear("canvas");
             this.clear("mini");
+            this.prediction = -1;
         },
-        predict: function() {
+        getDigit: function() {
             var c = document.getElementById("canvas");
             // redraw digit to appropriate size
             var t = document.getElementById("mini");
@@ -108,28 +112,46 @@ Vue.component('drawing-board', {
             var image = ctx.getImageData(0, 0, t.width, t.height);
             var data = image.data;
 
-            // digit data
-            var digit = new Uint8ClampedArray(t.width * t.height);
+            // digit tensor
+            var digit = [];
+
             for(var i = 0; i < data.length; i+=4) {
                 // for some reason the alpha
                 // channel holds the right data
+                var v = data[i + 3];
+
+                // add+normalize
+                digit.push(v / 255.);
+                
                 // we will redraw anyway as a
                 // good sanity check
-                digit[i % 4] = data[i + 3];
-                data[i] = data[i + 3];
-                data[i + 1] = data[i + 3];
-                data[i + 2] = data[i + 3];
+                data[i] =      v;
+                data[i + 1] =  v;
+                data[i + 2] =  v;
                 data[i + 3] = 255;
             }
             ctx.putImageData(image, 0, 0);
-            predictMNIST(digit);
+
+            return digit;
+        },
+        predict: async function() {
+            const digit = this.getDigit();
+            const d = tf.tensor1d(digit).reshape([1, digit.length]);
+            this.probabilities = await this.model.execute({'x': d}).reshape([10]).data();
+            this.prediction = this.probabilities.indexOf(Math.max(...this.probabilities));
         }
     },
-    ready: function () {
+    mounted: async function () {
         var c = document.getElementById("canvas");
         var ctx = c.getContext("2d");
         ctx.translate(0.5, 0.5);
         ctx.imageSmoothingEnabled= true;
+
+        // load model
+        const MODEL = 'model/tensorflowjs_model.pb';
+        const WEIGHTS = 'model/weights_manifest.json';
+        console.log('loading model...');
+        this.model = await tf.loadFrozenModel(MODEL, WEIGHTS);
     }
 })
 

@@ -8,3 +8,21 @@ html, body {
 canvas {
     border: solid 1px #c0c0c0;
 }
+
+#draw {
+    float: left;
+    margin-right: 50px;  
+}
+
+#buttons {
+    clear: both;
+}
+
+#predict {
+    font-size: 14px;
+}
+
+#prediction {
+    font-size: 26px;
+    font-weight: bold;
+}
