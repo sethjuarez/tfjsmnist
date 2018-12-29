@@ -148,9 +148,12 @@ Vue.component('drawing-board', {
         ctx.imageSmoothingEnabled= true;
 
         // load model
-        const MODEL = 'model/tensorflowjs_model.pb';
-        const WEIGHTS = 'model/weights_manifest.json';
+        const base = window.location.origin;
+        const MODEL = base + '/model/tensorflowjs_model.pb';
+        const WEIGHTS = base + '/model/weights_manifest.json';
         console.log('loading model...');
+        console.log(MODEL);
+        console.log(WEIGHTS);
         this.model = await tf.loadFrozenModel(MODEL, WEIGHTS);
     }
 })
