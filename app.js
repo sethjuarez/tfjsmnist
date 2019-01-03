@@ -102,7 +102,7 @@ Vue.component('drawing-board', {
             var ctx = t.getContext("2d");
             // clear previous image
             ctx.beginPath();
-            ctx.clearRect(0,0,t.width,t.height);
+            ctx.clearRect(0, 0, t.width, t.height);
             ctx.closePath();
 
             // resize
@@ -148,12 +148,8 @@ Vue.component('drawing-board', {
         ctx.imageSmoothingEnabled= true;
 
         // load model
-        const base = window.location.origin;
-        const MODEL = base + '/model/tensorflowjs_model.pb';
-        const WEIGHTS = base + '/model/weights_manifest.json';
-        console.log('loading model...');
-        console.log(MODEL);
-        console.log(WEIGHTS);
+        const MODEL = 'model/tensorflowjs_model.pb';
+        const WEIGHTS = 'model/weights_manifest.json';
         this.model = await tf.loadFrozenModel(MODEL, WEIGHTS);
     }
 })
