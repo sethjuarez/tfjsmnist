@@ -66,7 +66,7 @@ Vue.component('drawing-board', {
             var c = document.getElementById(el);
             var ctx = c.getContext("2d");
             ctx.beginPath();
-            ctx.clearRect(0,0,c.width,c.height);
+            ctx.clearRect(-3,-3,c.width+5,c.height+5);
             ctx.closePath();
         },
         handleMouseDown: function (event) {

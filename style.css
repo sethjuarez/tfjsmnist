@@ -5,6 +5,10 @@ html, body {
     padding: 0;
 }
 
+#repo {
+    font-size: 14px;
+    margin-top: 50px;
+}
 canvas {
     border: solid 1px #c0c0c0;
 }
